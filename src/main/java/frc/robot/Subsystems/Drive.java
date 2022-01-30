@@ -25,12 +25,12 @@ class Drive {
     
     public void setOpenLoop(double throttle, double turn) {
         if (throttle > 0) {
-            L1.set(ControlMode.PercentOutput, throttle + turn);
-            R1.set(ControlMode.PercentOutput, throttle - turn);
-        }
-        else {
             L1.set(ControlMode.PercentOutput, throttle - turn);
             R1.set(ControlMode.PercentOutput, throttle + turn);
+        }
+        else {
+            L1.set(ControlMode.PercentOutput, throttle + turn);
+            R1.set(ControlMode.PercentOutput, throttle - turn);
         }
         //throttle = how fast it's moving, turn = how fast it's turning
     }

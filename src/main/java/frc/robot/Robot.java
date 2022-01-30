@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import frc.robot.Constants;
+import frc.robot.subsystems.Drive;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -30,6 +34,10 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
   }
+
+  Joystick joystick1 = new Joystick(Constants.joystickId1);
+  Joystick joystick2 = new Joystick(Constants.joystickId2);
+  private Drive drive = new Drive();
 
   /**
    * This function is called every robot packet, no matter the mode. Use this for items like
@@ -78,11 +86,15 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    drive.setOpenLoop(joystick1.getRawAxis(1), joystick2.getRawAxis(0));
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    drive.stop();
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -90,7 +102,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when test mode is enabled. */
   @Override
-  public void testInit() {}
+  public void testInit() {
+    drive.stop();
+  }
 
   /** This function is called periodically during test mode. */
   @Override

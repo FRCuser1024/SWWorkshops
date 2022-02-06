@@ -34,7 +34,7 @@ public class Drive extends Subsystem {
         LM.set(ControlMode.PercentOutput, 0.0);
         RM.set(ControlMode.PercentOutput, 0.0);
     }
-    public class PIDF{
+    /*public class PIDF{
         private double Kp;
         private double Ki;
         private double Kd;
@@ -103,7 +103,160 @@ public class Drive extends Subsystem {
             }
             return output;
         }
+    }*/
+    public class PIDF {
+        private double kP;
+        private double kD;
+        private double kI;
+        private double F;
+        private double setpoint;
+        public PIDF (double kP, double kD, double kI, double F) {
+            this.kP = kP;
+            this.kD = kD;
+            this.kI = kI;
+            this.F = F;
+        }
+    
+        public double get (int id) {
+            switch (id){
+                case 1: 
+                    return kP;
+                case 2: 
+                    return kD;
+                case 3:
+                    return kI;
+                case 4:
+                    return F;
+                case 5: 
+                    return setpoint;
+                default: 
+                    return -1;
+            }
+        }
+    
+        public void set (int id, double value) {
+            switch (id){
+                case 1: 
+                    kP = value;
+                    break;
+                case 2: 
+                    kD = value;
+                    break;
+                case 3:
+                    kI = value;
+                    break;
+                case 4:
+                    F = value;
+                    break;
+                case 5:
+                    setpoint = value;
+                    break;
+                default: 
+                    break;
+            }
+        }
+    
+        public double getError (double pos) {
+            return setpoint - pos;
+        }
+    
+        public double update (double pos, double errorAllowed, int dt) {
+            double previous_error = 0;
+            double integral = 0;
+            double derivative = 0;
+            double output = 0;
+            double error = errorAllowed + 2;
+            while (error > errorAllowed) {
+                   error = setpoint - pos;
+                integral = integral + error * dt;
+                   derivative = (error - previous_error) / dt;
+                output = kP*error + kI*integral + kD*derivative;
+                previous_error = error;
+                try {
+                    Thread.sleep(dt);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            return output;
+        }
     }
 }
 
+/*public class PIDF {
+    private double kP;
+    private double kD;
+    private double kI;
+    private double F;
+    private double setpoint;
+    public PIDF (double kP. double kD, double kI, double F) {
+        this.kP = kP;
+        this.kD = kD;
+        this.kI = kI;
+        this.F = F;
+    }
 
+    public double get (int id) {
+        switch (id){
+            case 1: 
+                return kP;
+            case 2: 
+                return kD;
+            case 3:
+                return kI;
+            case 4:
+                return F;
+            case 5: 
+                return setpoint;
+            default: 
+                return -1;
+        }
+    }
+
+    public void set (int id, double value) {
+        switch (id){
+            case 1: 
+                kP = value;
+                break;
+            case 2: 
+                kD = value;
+                break;
+            case 3:
+                kI = value;
+                break;
+            case 4:
+                F = value;
+                break;
+            case 5:
+                setpoint = value;
+                break;
+            default: 
+                break;
+        }
+    }
+
+    public double getError (double pos) {
+        return setpoint - pos;
+    }
+
+    public double update (double pos, double errorAllowed, int dt) {
+        double previous_error = 0;
+        double integral = 0;
+        double derivative = 0;
+        double output = 0;
+        double error = errorAllowed + 2;
+        while (error > errorAllowed) {
+       	    error = setpoint - pos;
+        	integral = integral + error * dt;
+       	    derivative = (error - previous_error) / dt;
+    	    output = kP*error + kI*integral + kD*derivative;
+    	    previous_error = error;
+            try {
+                Thread.sleep(dt);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        return output;
+    }
+}*/

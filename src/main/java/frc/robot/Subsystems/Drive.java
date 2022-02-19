@@ -1,6 +1,10 @@
 package frc.robot.subsystems;
 import frc.robot.Constants;
 import java.lang.Math;
+import frc.robot.lib.util.DriveSignal;
+import frc.robot.Kinematics;
+import frc.robot.lib.util.Util;
+import frc.robot.lib.geometry.Twist2d;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -17,7 +21,7 @@ public class Drive extends Subsystem {
         RF.set(ControlMode.Follower, 3);
         RM.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 1000);
     }
-    public void setOpenLoop(double throttle, double turn){
+    /*public void setOpenLoop(double throttle, double turn){
         double LT;
         double RT;
         if (Math.signum(throttle) != 0) {
@@ -29,7 +33,7 @@ public class Drive extends Subsystem {
         }
         LM.set(ControlMode.PercentOutput, (throttle+LT)/2);
         RM.set(ControlMode.PercentOutput, (throttle+RT)/2);
-    }
+    }*/
     public void stop(){
         LM.set(ControlMode.PercentOutput, 0.0);
         RM.set(ControlMode.PercentOutput, 0.0);
@@ -181,6 +185,30 @@ public class Drive extends Subsystem {
             return output;
         }
     }
+
+    // DriveSignal is an object that stores left percentage and right percentage to write to motor
+    // Twist2d stores robot velocity in dx, dy, and dtheta
+    // Inv kin converts robot movement, to individual wheel movement (i.e. joystick inputs to left and right speeds)
+
+    public synchronized void setCheesyishDrive(double throttle, double wheel, boolean quickTurn) {
+        if (Util.epsilonEquals(throttle, 0.0, 0.04)) { throttle = 0.0; }
+        if (Util.epsilonEquals(wheel, 0.0, 0.035)) { wheel = 0.0; }
+        final double kWheelGain = 0.05;
+        final double kWheelNonlinearity = 0.05;
+        final double denominator = Math.sin(Math.PI / 2.0 * kWheelNonlinearity);
+        if (!quickTurn) { // Apply a sin function that's scaled to make it feel better.
+            wheel = Math.sin(Math.PI / 2.0 * kWheelNonlinearity * wheel);
+            wheel = Math.sin(Math.PI / 2.0 * kWheelNonlinearity * wheel);
+            wheel = wheel / (denominator * denominator) * Math.abs(throttle);
+        }
+        wheel *= kWheelGain;
+        DriveSignal signal = Kinematics.inverseKinematics(new Twist2d(throttle, 0.0, wheel));
+        double scaling_factor = Math.max(1.0, Math.max(Math.abs(signal.getLeft()), Math.abs(signal.getRight())));
+        LM.set(ControlMode.PercentOutput, signal.getLeft() / scaling_factor);
+        RM.set(ControlMode.PercentOutput, signal.getRight() / scaling_factor);
+        //setOpenLoop(new DriveSignal(signal.getLeft() / scaling_factor, signal.getRight() / scaling_factor));
+   }
+ 
 }
 
 /*public class PIDF {

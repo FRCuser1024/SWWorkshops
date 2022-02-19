@@ -87,7 +87,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    drive.setOpenLoop(joystick1.getRawAxis(1), joystick2.getRawAxis(0));
+    drive.setCheesyishDrive(joystick1.getRawAxis(1), joystick2.getRawAxis(0), true);
   }
 
   /** This function is called once when the robot is disabled. */
